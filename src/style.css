@@ -1,0 +1,55 @@
+/* Global font and rendering settings */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Let Bootstrap handle body layout */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Optional: keep link styling (or remove to rely on Bootstrap) */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: none;
+}
+a:hover {
+  color: #535bf2;
+}
+
+/* Only keep heading if you're not using Bootstrap's h1-h6 */
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Optional: buttons (can be removed if Bootstrap used) */
+button {
+  font-family: inherit;
+}
+
+/* Optional: card content (let Bootstrap handle most card styling) */
+.card {
+  padding: 1rem;
+}
+
+/* Responsive light mode override (optional) */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+}
