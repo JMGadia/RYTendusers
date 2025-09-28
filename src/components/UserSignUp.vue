@@ -17,7 +17,6 @@
               Create your account to place orders and track your transactions.
             </p>
           </div>
-
           <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
             <div class="floating-shapes">
               <div class="shape shape-1"></div>
@@ -57,19 +56,6 @@
                     <div v-if="errors.username" class="invalid-feedback">
                       {{ errors.username }}
                     </div>
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label fw-semibold">
-                      <i class="fas fa-phone me-2 text-muted"></i>Contact Number
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control form-control-lg rounded-3"
-                      v-model="form.contact"
-                      placeholder="Enter your contact number"
-                      required
-                    />
                   </div>
 
                   <div class="mb-3">
@@ -147,104 +133,215 @@
         </div>
       </div>
     </div>
+
+    <div v-if="showVerificationModal" class="verification-modal-overlay">
+      <div class="verification-modal-content card shadow-lg p-4">
+        <h4 class="text-center fw-bold mb-3">Human Verification</h4>
+        <p class="text-center text-muted mb-3">
+          Please position your face in the frame and capture an image to verify your account.
+        </p>
+        
+        <div class="video-container bg-dark rounded mb-3">
+          <video ref="videoRef" autoplay playsinline class="w-100"></video>
+          <div v-if="verificationStatus !== 'capturing'" class="verification-status-overlay">
+             <div v-if="verificationStatus === 'verifying'" class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-primary mb-2"></div>
+                <span>Verifying...</span>
+             </div>
+             <div v-if="verificationStatus === 'success'" class="d-flex flex-column align-items-center text-success">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <span>Verification Complete!</span>
+             </div>
+             <div v-if="verificationStatus === 'error'" class="d-flex flex-column align-items-center text-danger">
+                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                <span>Verification Failed! Please try again.</span>
+             </div>
+          </div>
+        </div>
+        
+        <canvas ref="canvasRef" style="display: none;"></canvas>
+
+        <div class="d-grid gap-2">
+          <button @click="captureAndVerify" class="btn btn-primary" :disabled="verificationStatus !== 'capturing'">
+             <i class="fas fa-camera me-2"></i>Capture & Verify
+          </button>
+          <button @click="closeModal" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '@/supabase'
 
 const router = useRouter()
 
-// ⬅️ UPDATED: Removed `fullname` from the form data
 const form = reactive({
   username: '',
-  contact: '',
   email: '',
   password: '',
   facialRecognition: false
 })
 
-// Validation errors
 const errors = reactive({
   username: '',
   email: '',
   password: ''
 })
 
-// Loading state
 const isLoading = ref(false)
+const showVerificationModal = ref(false)
+const videoRef = ref(null)
+const canvasRef = ref(null)
+const mediaStream = ref(null)
+const verificationStatus = ref('capturing') // States: capturing, verifying, success, error
 
-const handleSignUp = async () => {
+const validateForm = () => {
   errors.username = ''
   errors.email = ''
   errors.password = ''
+  let isValid = true
 
-  // Client-side validation
   if (!form.username.trim()) {
     errors.username = 'Username is required'
+    isValid = false
   }
   if (!form.email.trim()) {
     errors.email = 'Email is required'
-  }
-  if (!form.password.trim()) {
-    errors.password = 'Password is required'
+    isValid = false
   }
   if (form.password.length < 6) {
     errors.password = 'Password must be at least 6 characters'
+    isValid = false
   }
+  return isValid
+}
 
-  if (errors.username || errors.email || errors.password) {
-    return
-  }
-
-  isLoading.value = true
-
+const startCamera = async () => {
   try {
-    // Create a new user with Supabase authentication
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-    })
-
-    if (authError) {
-      throw authError
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    mediaStream.value = stream
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream
     }
-
-    const user = authData.user
-
-    // ⬅️ UPDATED: Insert profile data into `usermanagement` table without fullname
-    const { error: profileError } = await supabase
-      .from('usermanagement')
-      .insert([
-        {
-          user_id: user.id,
-          username: form.username,
-          email: form.email,
-          contact_number: form.contact,
-          role: 'customer'
-        }
-      ])
-
-    if (profileError) {
-      throw profileError
-    }
-
-    alert('Account created successfully! Please check your email to verify your account.')
-    router.push({ name: 'Login' })
-
-  } catch (error) {
-    console.error('Sign-up failed:', error.message)
-    if (error.message.includes('User already registered')) {
-      alert('This email is already in use. Please log in instead or use a different email.')
-    } else {
-      alert('An unexpected error occurred. Please try again later.')
-    }
-  } finally {
-    isLoading.value = false
+    verificationStatus.value = 'capturing';
+  } catch (err) {
+    console.error("Error accessing camera:", err)
+    verificationStatus.value = 'error'
+    alert("Could not access the camera. Please check your browser permissions.")
   }
 }
+
+const stopCamera = () => {
+  if (mediaStream.value) {
+    mediaStream.value.getTracks().forEach(track => track.stop())
+    mediaStream.value = null
+  }
+}
+
+const closeModal = () => {
+  stopCamera()
+  showVerificationModal.value = false
+  isLoading.value = false
+  verificationStatus.value = 'capturing'
+}
+
+const handleSignUp = async () => {
+  if (!validateForm()) return
+
+  if (form.facialRecognition) {
+    showVerificationModal.value = true
+    await startCamera()
+  } else {
+    await executeSignUp()
+  }
+}
+
+const captureAndVerify = async () => {
+  if (!videoRef.value || !canvasRef.value) {
+    verificationStatus.value = 'error';
+    return;
+  }
+
+  verificationStatus.value = 'verifying';
+  
+  const video = videoRef.value;
+  const canvas = canvasRef.value;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const context = canvas.getContext('2d');
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+  try {
+    const response = await fetch('http://localhost:3000/api/verify-liveness', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageData: imageDataUrl }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      verificationStatus.value = 'success';
+      setTimeout(async () => {
+          await executeSignUp();
+      }, 1500);
+    } else {
+      throw new Error(data.message || 'Liveness check failed.');
+    }
+
+  } catch (err) {
+    console.error('Verification error:', err);
+    alert(`Verification failed: ${err.message}`);
+    verificationStatus.value = 'error';
+    setTimeout(() => { verificationStatus.value = 'capturing'; }, 2000);
+  }
+};
+
+const executeSignUp = async () => {
+  isLoading.value = true;
+  try {
+    const response = await fetch('http://localhost:3000/api/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to sign up.');
+    }
+
+    alert('Account created successfully! You can now log in.');
+    router.push({ name: 'Login' });
+
+  } catch (error) {
+    console.error('Sign-up failed:', error.message);
+    alert(`Sign-up failed: ${error.message}`);
+  } finally {
+    isLoading.value = false;
+    if (showVerificationModal.value) {
+      closeModal();
+    }
+  }
+};
+
+onUnmounted(() => {
+  stopCamera()
+})
 </script>
 
 <style scoped>
@@ -274,7 +371,7 @@ const handleSignUp = async () => {
 }
 
 .login-form-container { 
-  max-width: 720px; /* or try 640px or 720px */
+  max-width: 720px;
   width: 100%;
   padding: 2rem;
   position: relative; 
@@ -351,5 +448,48 @@ const handleSignUp = async () => {
   50% {
     transform: translateY(-20px);
   }
+}
+
+/* Styles for Verification Modal */
+.verification-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(5px);
+}
+
+.verification-modal-content {
+    width: 90%;
+    max-width: 450px;
+}
+
+.video-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.verification-status-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+video {
+    transform: scaleX(-1); /* Mirror the video for a selfie-like view */
 }
 </style>

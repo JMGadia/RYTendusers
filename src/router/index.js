@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserLogIn from '../components/UserLogIn.vue' // ⬅️ Corrected relative path
 import UserSignUp from '../components/UserSignUp.vue' // ⬅️ Corrected relative path
-import OrderingSystem from '../components/OrderingSystem.vue' // ⬅️ Corrected relative path
+import OrderingSystem from '../views/OrderingSystem.vue' // ⬅️ Corrected relative path
 
 const routes = [
   {
