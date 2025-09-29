@@ -1,13 +1,10 @@
 <template>
   <div class="login-page">
     <div class="background-overlay"></div>
-
     <div class="container-fluid">
       <div class="row min-vh-100 align-items-center">
-        <div
-          class="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center bg-primary-gradient text-white position-relative"
-        >
-          <div class="text-center z-index-2 px-4">
+        <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center bg-primary-gradient text-white position-relative">
+           <div class="text-center z-index-2 px-4">
             <div class="mb-4">
               <i class="fas fa-user-plus fa-5x mb-3 text-white-50"></i>
             </div>
@@ -17,6 +14,7 @@
               Create your account to place orders and track your transactions.
             </p>
           </div>
+
           <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
             <div class="floating-shapes">
               <div class="shape shape-1"></div>
@@ -30,7 +28,7 @@
           <div class="login-form-container mx-auto w-100 px-3 px-sm-4 px-md-5">
             <div class="card shadow-lg border-0 rounded-4">
               <div class="card-body p-4 p-sm-5">
-                <div class="text-center mb-4">
+                 <div class="text-center mb-4">
                   <div class="avatar-wrapper mx-auto mb-3">
                     <div class="avatar bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center">
                       <i class="fas fa-user-plus fa-2x text-primary"></i>
@@ -45,51 +43,22 @@
                     <label class="form-label fw-semibold">
                       <i class="fas fa-user me-2 text-muted"></i>Create Username
                     </label>
-                    <input
-                      type="text"
-                      class="form-control form-control-lg rounded-3"
-                      v-model="form.username"
-                      placeholder="Enter your username"
-                      required
-                      :class="{ 'is-invalid': errors.username }"
-                    />
-                    <div v-if="errors.username" class="invalid-feedback">
-                      {{ errors.username }}
-                    </div>
+                    <input type="text" class="form-control form-control-lg rounded-3" v-model="form.username" placeholder="Enter your username" required :class="{ 'is-invalid': errors.username }" />
+                    <div v-if="errors.username" class="invalid-feedback">{{ errors.username }}</div>
                   </div>
-
                   <div class="mb-3">
                     <label class="form-label fw-semibold">
                       <i class="fas fa-envelope me-2 text-muted"></i>Email
                     </label>
-                    <input
-                      type="email"
-                      class="form-control form-control-lg rounded-3"
-                      v-model="form.email"
-                      placeholder="Enter your email"
-                      required
-                      :class="{ 'is-invalid': errors.email }"
-                    />
-                    <div v-if="errors.email" class="invalid-feedback">
-                      {{ errors.email }}
-                    </div>
+                    <input type="email" class="form-control form-control-lg rounded-3" v-model="form.email" placeholder="Enter your email" required :class="{ 'is-invalid': errors.email }" />
+                    <div v-if="errors.email" class="invalid-feedback">{{ errors.email }}</div>
                   </div>
-
                   <div class="mb-3">
                     <label class="form-label fw-semibold">
                       <i class="fas fa-lock me-2 text-muted"></i>Create Password
                     </label>
-                    <input
-                      type="password"
-                      class="form-control form-control-lg rounded-3"
-                      v-model="form.password"
-                      placeholder="Enter your password"
-                      required
-                      :class="{ 'is-invalid': errors.password }"
-                    />
-                    <div v-if="errors.password" class="invalid-feedback">
-                      {{ errors.password }}
-                    </div>
+                    <input type="password" class="form-control form-control-lg rounded-3" v-model="form.password" placeholder="Enter your password" required :class="{ 'is-invalid': errors.password }" />
+                    <div v-if="errors.password" class="invalid-feedback">{{ errors.password }}</div>
                   </div>
 
                   <div class="form-check mb-4">
@@ -100,14 +69,10 @@
                   </div>
 
                   <div class="d-grid mb-4">
-                    <button
-                      type="submit"
-                      class="btn btn-primary btn-lg rounded-3 fw-semibold"
-                      :disabled="isLoading"
-                    >
+                    <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-semibold" :disabled="isLoading">
                       <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
                       <i v-else class="fas fa-user-plus me-2"></i>
-                      {{ isLoading ? 'Signing up...' : 'Sign Up' }}
+                      {{ isLoading ? 'Processing...' : 'Sign Up' }}
                     </button>
                   </div>
                 </form>
@@ -134,38 +99,16 @@
       </div>
     </div>
 
-    <div v-if="showVerificationModal" class="verification-modal-overlay">
-      <div class="verification-modal-content card shadow-lg p-4">
-        <h4 class="text-center fw-bold mb-3">Human Verification</h4>
-        <p class="text-center text-muted mb-3">
-          Please position your face in the frame and capture an image to verify your account.
-        </p>
-        
-        <div class="video-container bg-dark rounded mb-3">
-          <video ref="videoRef" autoplay playsinline class="w-100"></video>
-          <div v-if="verificationStatus !== 'capturing'" class="verification-status-overlay">
-             <div v-if="verificationStatus === 'verifying'" class="d-flex flex-column align-items-center">
-                <div class="spinner-border text-primary mb-2"></div>
-                <span>Verifying...</span>
-             </div>
-             <div v-if="verificationStatus === 'success'" class="d-flex flex-column align-items-center text-success">
-                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                <span>Verification Complete!</span>
-             </div>
-             <div v-if="verificationStatus === 'error'" class="d-flex flex-column align-items-center text-danger">
-                <i class="fas fa-times-circle fa-2x mb-2"></i>
-                <span>Verification Failed! Please try again.</span>
-             </div>
-          </div>
-        </div>
-        
-        <canvas ref="canvasRef" style="display: none;"></canvas>
-
+    <div v-if="showCameraModal" class="camera-modal">
+      <div class="camera-modal-content">
+        <h4 class="text-center mb-3">Face Verification</h4>
+        <p class="text-center text-muted mb-3">Please center your face in the frame and capture a photo.</p>
+        <video ref="videoRef" autoplay playsinline class="w-100 rounded-3 mb-3"></video>
         <div class="d-grid gap-2">
-          <button @click="captureAndVerify" class="btn btn-primary" :disabled="verificationStatus !== 'capturing'">
-             <i class="fas fa-camera me-2"></i>Capture & Verify
-          </button>
-          <button @click="closeModal" class="btn btn-secondary">Cancel</button>
+           <button @click="captureAndVerify" class="btn btn-success btn-lg">
+             <i class="fas fa-camera me-2"></i>Capture Photo
+           </button>
+           <button @click="closeCamera" class="btn btn-secondary btn-sm">Cancel</button>
         </div>
       </div>
     </div>
@@ -175,6 +118,7 @@
 <script setup>
 import { ref, reactive, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '../server/supabase'
 
 const router = useRouter()
 
@@ -192,140 +136,88 @@ const errors = reactive({
 })
 
 const isLoading = ref(false)
-const showVerificationModal = ref(false)
+const showCameraModal = ref(false)
 const videoRef = ref(null)
-const canvasRef = ref(null)
-const mediaStream = ref(null)
-const verificationStatus = ref('capturing') // States: capturing, verifying, success, error
-
-const validateForm = () => {
-  errors.username = ''
-  errors.email = ''
-  errors.password = ''
-  let isValid = true
-
-  if (!form.username.trim()) {
-    errors.username = 'Username is required'
-    isValid = false
-  }
-  if (!form.email.trim()) {
-    errors.email = 'Email is required'
-    isValid = false
-  }
-  if (form.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
-    isValid = false
-  }
-  return isValid
-}
+let stream = null;
 
 const startCamera = async () => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-    mediaStream.value = stream
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
     if (videoRef.value) {
-      videoRef.value.srcObject = stream
+      videoRef.value.srcObject = stream;
     }
-    verificationStatus.value = 'capturing';
   } catch (err) {
-    console.error("Error accessing camera:", err)
-    verificationStatus.value = 'error'
-    alert("Could not access the camera. Please check your browser permissions.")
+    console.error("Error accessing camera:", err);
+    alert("Could not access the camera. Please ensure you have given permission.");
+    closeCamera();
   }
 }
 
-const stopCamera = () => {
-  if (mediaStream.value) {
-    mediaStream.value.getTracks().forEach(track => track.stop())
-    mediaStream.value = null
+const closeCamera = () => {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
   }
-}
-
-const closeModal = () => {
-  stopCamera()
-  showVerificationModal.value = false
-  isLoading.value = false
-  verificationStatus.value = 'capturing'
-}
-
-const handleSignUp = async () => {
-  if (!validateForm()) return
-
-  if (form.facialRecognition) {
-    showVerificationModal.value = true
-    await startCamera()
-  } else {
-    await executeSignUp()
-  }
+  showCameraModal.value = false
+  isLoading.value = false;
 }
 
 const captureAndVerify = async () => {
-  if (!videoRef.value || !canvasRef.value) {
-    verificationStatus.value = 'error';
-    return;
-  }
+  if (!videoRef.value) return;
 
-  verificationStatus.value = 'verifying';
-  
-  const video = videoRef.value;
-  const canvas = canvasRef.value;
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  const context = canvas.getContext('2d');
-  context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-  const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-  try {
-    const response = await fetch('http://localhost:3000/api/verify-liveness', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imageData: imageDataUrl }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      verificationStatus.value = 'success';
-      setTimeout(async () => {
-          await executeSignUp();
-      }, 1500);
-    } else {
-      throw new Error(data.message || 'Liveness check failed.');
-    }
-
-  } catch (err) {
-    console.error('Verification error:', err);
-    alert(`Verification failed: ${err.message}`);
-    verificationStatus.value = 'error';
-    setTimeout(() => { verificationStatus.value = 'capturing'; }, 2000);
-  }
-};
-
-const executeSignUp = async () => {
   isLoading.value = true;
-  try {
-    const response = await fetch('http://localhost:3000/api/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: form.username,
-        email: form.email,
-        password: form.password,
-      }),
-    });
+  const canvas = document.createElement('canvas');
+  canvas.width = videoRef.value.videoWidth;
+  canvas.height = videoRef.value.videoHeight;
+  const context = canvas.getContext('2d');
+  context.drawImage(videoRef.value, 0, 0, canvas.width, canvas.height);
+  const imageBase64 = canvas.toDataURL('image/jpeg');
+  
+  closeCamera();
 
-    const data = await response.json();
+  try {
+    const response = await fetch('http://localhost:3000/api/verify-face', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64 })
+    });
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to sign up.');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Face verification failed.');
     }
 
-    alert('Account created successfully! You can now log in.');
+    console.log('Face verification successful!');
+    await proceedWithSupabaseSignUp();
+
+  } catch (error) {
+    console.error('Face verification failed:', error.message);
+    alert(`Face verification failed: ${error.message}`);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ⬇️ UPDATED LOGIC IS HERE ⬇️
+const proceedWithSupabaseSignUp = async () => {
+  isLoading.value = true;
+  try {
+    // We now pass the username in the 'options.data' field.
+    // This metadata will be used by our database trigger.
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          username: form.username
+        }
+      }
+    });
+
+    if (error) throw error;
+
+    // The manual insert into the 'profiles' table is now REMOVED.
+    
+    alert('Account created! Please check your email for a verification link.');
     router.push({ name: 'Login' });
 
   } catch (error) {
@@ -333,14 +225,32 @@ const executeSignUp = async () => {
     alert(`Sign-up failed: ${error.message}`);
   } finally {
     isLoading.value = false;
-    if (showVerificationModal.value) {
-      closeModal();
-    }
   }
 };
 
+const handleSignUp = async () => {
+  errors.username = ''
+  errors.email = ''
+  errors.password = ''
+
+  let hasError = false;
+  if (!form.username.trim()) { errors.username = 'Username is required'; hasError = true; }
+  if (!form.email.trim()) { errors.email = 'Email is required'; hasError = true; }
+  if (form.password.length < 6) { errors.password = 'Password must be at least 6 characters'; hasError = true; }
+  if (hasError) return;
+
+  if (form.facialRecognition) {
+    showCameraModal.value = true;
+    startCamera();
+  } else {
+    await proceedWithSupabaseSignUp();
+  }
+}
+
 onUnmounted(() => {
-  stopCamera()
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
 })
 </script>
 
@@ -371,7 +281,7 @@ onUnmounted(() => {
 }
 
 .login-form-container { 
-  max-width: 720px;
+  max-width: 720px; /* or try 640px or 720px */
   width: 100%;
   padding: 2rem;
   position: relative; 
@@ -450,46 +360,27 @@ onUnmounted(() => {
   }
 }
 
-/* Styles for Verification Modal */
-.verification-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1050;
-    backdrop-filter: blur(5px);
+
+/* NEW: Styles for the camera modal */
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
 }
 
-.verification-modal-content {
-    width: 90%;
-    max-width: 450px;
-}
-
-.video-container {
-    position: relative;
-    overflow: hidden;
-}
-
-.verification-status-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-}
-
-video {
-    transform: scaleX(-1); /* Mirror the video for a selfie-like view */
+.camera-modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 </style>
