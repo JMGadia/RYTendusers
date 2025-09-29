@@ -175,7 +175,8 @@ const captureAndVerify = async () => {
   closeCamera();
 
   try {
-    const response = await fetch('http://localhost:3000/api/verify-face', {
+    // ✅ **UPDATED LINE:** The URL now uses your environment variable
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/verify-face`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64 })
@@ -197,12 +198,9 @@ const captureAndVerify = async () => {
   }
 }
 
-// ⬇️ UPDATED LOGIC IS HERE ⬇️
 const proceedWithSupabaseSignUp = async () => {
   isLoading.value = true;
   try {
-    // We now pass the username in the 'options.data' field.
-    // This metadata will be used by our database trigger.
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -214,8 +212,6 @@ const proceedWithSupabaseSignUp = async () => {
     });
 
     if (error) throw error;
-
-    // The manual insert into the 'profiles' table is now REMOVED.
     
     alert('Account created! Please check your email for a verification link.');
     router.push({ name: 'Login' });
